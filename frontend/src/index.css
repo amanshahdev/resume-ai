@@ -205,6 +205,65 @@ a:hover {
   }
 }
 
+.auth-page {
+  width: 100%;
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-branding {
+  border-right: 1px solid var(--border);
+}
+
+.auth-form-panel {
+  width: 100%;
+  max-width: 520px;
+}
+
+.auth-card {
+  width: 100%;
+}
+
+.upload-page {
+  width: 100%;
+}
+
+.upload-step-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.upload-step-desc {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .auth-page {
+    flex-direction: column;
+  }
+
+  .auth-branding {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 22px;
+  }
+
+  .auth-form-panel {
+    padding-top: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .upload-step-row {
+    flex-direction: column;
+  }
+
+  .upload-step-desc {
+    display: none;
+  }
+}
+
 @keyframes pulse {
   0%,
   100% {
