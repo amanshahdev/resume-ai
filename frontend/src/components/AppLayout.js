@@ -28,28 +28,53 @@ const Icons = {
   spark: "M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5L12 3z",
 };
 
+const NAV_THEME = {
+  dashboard: {
+    softBg: "rgba(79, 195, 247, 0.16)",
+    softBorder: "rgba(79, 195, 247, 0.38)",
+    text: "#cff2ff",
+    activeBg: "linear-gradient(135deg, #34b9f3, #1d7ea9)",
+    glow: "0 12px 22px rgba(79, 195, 247, 0.38)",
+  },
+  upload: {
+    softBg: "rgba(255, 196, 106, 0.18)",
+    softBorder: "rgba(255, 196, 106, 0.38)",
+    text: "#ffe8bf",
+    activeBg: "linear-gradient(135deg, #f7bc60, #d7862f)",
+    glow: "0 12px 22px rgba(247, 188, 96, 0.36)",
+  },
+  history: {
+    softBg: "rgba(132, 239, 196, 0.18)",
+    softBorder: "rgba(132, 239, 196, 0.36)",
+    text: "#d8fbe9",
+    activeBg: "linear-gradient(135deg, #56d4a0, #208966)",
+    glow: "0 12px 22px rgba(86, 212, 160, 0.34)",
+  },
+};
+
 const NavItem = ({ to, icon, label }) => (
   <NavLink
     to={to}
-    style={({ isActive }) => ({
-      display: "flex",
-      alignItems: "center",
-      gap: 10,
-      padding: "12px 14px",
-      borderRadius: "var(--radius-md)",
-      color: isActive ? "var(--text-inverse)" : "var(--text-secondary)",
-      textDecoration: "none",
-      fontSize: "0.88rem",
-      fontFamily: "var(--font-display)",
-      fontWeight: 700,
-      letterSpacing: "0.02em",
-      background: isActive
-        ? "linear-gradient(135deg, var(--primary), var(--primary-dark))"
-        : "transparent",
-      border: isActive ? "1px solid transparent" : "1px solid transparent",
-      boxShadow: isActive ? "0 12px 22px var(--primary-glow)" : "none",
-      transition: "all var(--transition)",
-    })}
+    style={({ isActive }) => {
+      const theme = NAV_THEME[icon] || NAV_THEME.dashboard;
+      return {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "12px 14px",
+        borderRadius: "var(--radius-md)",
+        color: isActive ? "#fffdf8" : theme.text,
+        textDecoration: "none",
+        fontSize: "0.88rem",
+        fontFamily: "var(--font-display)",
+        fontWeight: 700,
+        letterSpacing: "0.02em",
+        background: isActive ? theme.activeBg : theme.softBg,
+        border: `1px solid ${isActive ? "transparent" : theme.softBorder}`,
+        boxShadow: isActive ? theme.glow : "none",
+        transition: "all var(--transition)",
+      };
+    }}
   >
     <Icon d={Icons[icon]} size={17} />
     {label}
@@ -150,7 +175,7 @@ export default function AppLayout() {
                     fontSize: "1.1rem",
                   }}
                 >
-                  ResumeStudio
+                  ResumeAI
                 </div>
                 <div style={{ fontSize: "0.72rem", opacity: 0.8 }}>
                   Sharper resumes, faster
@@ -311,23 +336,7 @@ export default function AppLayout() {
               Track uploads, run analysis, iterate faster
             </div>
           </div>
-          <div style={{ marginLeft: "auto" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                border: "1px solid var(--border-light)",
-                borderRadius: "var(--radius-full)",
-                padding: "6px 12px",
-                fontSize: "0.74rem",
-                fontWeight: 600,
-                color: "var(--text-secondary)",
-                background: "var(--bg-elevated)",
-              }}
-            >
-              {user?.plan || "Free"} Plan
-            </span>
-          </div>
+          <div style={{ marginLeft: "auto" }} />
         </header>
 
         <main
