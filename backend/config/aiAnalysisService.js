@@ -12,7 +12,16 @@
 
 const axios = require("axios");
 
-const HUGGINGFACE_MODEL = "mistralai/Mistral-7B-Instruct-v0.1";
+const HUGGINGFACE_MODEL =
+  process.env.HUGGINGFACE_MODEL || "mistralai/Mistral-7B-Instruct-v0.3";
+const HUGGINGFACE_MODEL_FALLBACKS = [
+  HUGGINGFACE_MODEL,
+  "google/flan-t5-large",
+  "google/flan-t5-base",
+];
+const HUGGINGFACE_INFERENCE_BASE_URL =
+  process.env.HUGGINGFACE_INFERENCE_URL ||
+  "https://api-inference.huggingface.co/models";
 const ALLOWED_EXPERIENCE_LEVELS = [
   "Entry Level",
   "Mid Level",
@@ -146,48 +155,68 @@ Rules:
 Resume text:
 ${resumeText.substring(0, 6000)}`;
 
-  const response = await axios.post(
-    `https://api-inference.huggingface.co/models/${HUGGINGFACE_MODEL}`,
-    {
-      inputs: prompt,
-      parameters: {
-        max_new_tokens: 700,
-        temperature: 0.2,
-        return_full_text: false,
-      },
-      options: {
-        wait_for_model: true,
-      },
+  const requestBody = {
+    inputs: prompt,
+    parameters: {
+      max_new_tokens: 700,
+      temperature: 0.2,
+      return_full_text: false,
     },
-    {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      timeout: 30000,
+    options: {
+      wait_for_model: true,
     },
-  );
+  };
 
-  const generatedText = Array.isArray(response.data)
-    ? response.data[0]?.generated_text
-    : response.data?.generated_text;
+  const responseErrors = [];
 
-  if (!generatedText || typeof generatedText !== "string") {
-    throw new Error("Hugging Face returned an unexpected response.");
+  for (const model of HUGGINGFACE_MODEL_FALLBACKS) {
+    try {
+      const response = await axios.post(
+        `${HUGGINGFACE_INFERENCE_BASE_URL}/${model}`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 30000,
+        },
+      );
+
+      const generatedText = Array.isArray(response.data)
+        ? response.data[0]?.generated_text
+        : response.data?.generated_text;
+
+      if (!generatedText || typeof generatedText !== "string") {
+        throw new Error("Hugging Face returned an unexpected response.");
+      }
+
+      const jsonPayload = extractJsonPayload(generatedText);
+      if (!jsonPayload) {
+        throw new Error("Hugging Face response did not contain valid JSON.");
+      }
+
+      const parsed = JSON.parse(jsonPayload);
+      const analysis = normalizeAnalysisResponse(parsed);
+
+      return {
+        ...analysis,
+        aiModel: `huggingface/${model}`,
+      };
+    } catch (error) {
+      const status = error?.response?.status;
+      const message = status
+        ? `model ${model} returned HTTP ${status}`
+        : `model ${model} failed: ${error.message}`;
+      responseErrors.push(message);
+
+      if (status === 400 || status === 401 || status === 403) {
+        break;
+      }
+    }
   }
 
-  const jsonPayload = extractJsonPayload(generatedText);
-  if (!jsonPayload) {
-    throw new Error("Hugging Face response did not contain valid JSON.");
-  }
-
-  try {
-    return normalizeAnalysisResponse(JSON.parse(jsonPayload));
-  } catch (parseError) {
-    throw new Error(
-      `Failed to parse Hugging Face analysis JSON: ${parseError.message}`,
-    );
-  }
+  throw new Error(`Hugging Face analysis failed: ${responseErrors.join("; ")}`);
 };
 
 // ── Main exported analysis function ──────────────────────────────────────────
@@ -207,7 +236,7 @@ const analyzeResume = async (resumeText) => {
   return {
     ...analysis,
     processingTimeMs,
-    aiModel: `huggingface/${HUGGINGFACE_MODEL}`,
+    aiModel: analysis.aiModel || `huggingface/${HUGGINGFACE_MODEL}`,
     analysisVersion: ANALYSIS_VERSION,
   };
 };
