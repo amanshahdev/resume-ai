@@ -8,19 +8,19 @@
  * WHY:  Caching AI results reduces latency, costs, and API rate-limit pressure.
  */
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const analysisSchema = new mongoose.Schema(
   {
     resume: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Resume',
+      ref: "Resume",
       required: true,
       unique: true, // One analysis per resume
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
       index: true,
     },
@@ -34,10 +34,10 @@ const analysisSchema = new mongoose.Schema(
     },
     scoreBreakdown: {
       formatting: { type: Number, min: 0, max: 100, default: 0 },
-      keywords:   { type: Number, min: 0, max: 100, default: 0 },
+      keywords: { type: Number, min: 0, max: 100, default: 0 },
       experience: { type: Number, min: 0, max: 100, default: 0 },
-      education:  { type: Number, min: 0, max: 100, default: 0 },
-      skills:     { type: Number, min: 0, max: 100, default: 0 },
+      education: { type: Number, min: 0, max: 100, default: 0 },
+      skills: { type: Number, min: 0, max: 100, default: 0 },
     },
 
     // ── Skills ───────────────────────────────────────────────────────────────
@@ -65,18 +65,24 @@ const analysisSchema = new mongoose.Schema(
     },
     overallFeedback: {
       type: String,
-      default: '',
+      default: "",
     },
 
     // ── Job Matching ─────────────────────────────────────────────────────────
     detectedJobTitle: {
       type: String,
-      default: 'Not detected',
+      default: "Not detected",
     },
     experienceLevel: {
       type: String,
-      enum: ['Entry Level', 'Mid Level', 'Senior Level', 'Executive', 'Unknown'],
-      default: 'Unknown',
+      enum: [
+        "Entry Level",
+        "Mid Level",
+        "Senior Level",
+        "Executive",
+        "Unknown",
+      ],
+      default: "Unknown",
     },
     industryMatch: {
       type: [String],
@@ -86,7 +92,7 @@ const analysisSchema = new mongoose.Schema(
     // ── AI Metadata ──────────────────────────────────────────────────────────
     aiModel: {
       type: String,
-      default: 'rule-based + huggingface',
+      default: "huggingface/mistralai/Mistral-7B-Instruct-v0.1",
     },
     processingTimeMs: {
       type: Number,
@@ -94,30 +100,30 @@ const analysisSchema = new mongoose.Schema(
     },
     analysisVersion: {
       type: String,
-      default: '1.0',
+      default: "2.0",
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // ── Grade helper virtual ─────────────────────────────────────────────────────
-analysisSchema.virtual('grade').get(function () {
+analysisSchema.virtual("grade").get(function () {
   const s = this.overallScore;
-  if (s >= 90) return 'A+';
-  if (s >= 80) return 'A';
-  if (s >= 70) return 'B';
-  if (s >= 60) return 'C';
-  if (s >= 50) return 'D';
-  return 'F';
+  if (s >= 90) return "A+";
+  if (s >= 80) return "A";
+  if (s >= 70) return "B";
+  if (s >= 60) return "C";
+  if (s >= 50) return "D";
+  return "F";
 });
 
-analysisSchema.set('toJSON', { virtuals: true });
-analysisSchema.set('toObject', { virtuals: true });
+analysisSchema.set("toJSON", { virtuals: true });
+analysisSchema.set("toObject", { virtuals: true });
 
 analysisSchema.index({ user: 1, createdAt: -1 });
 
-const Analysis = mongoose.model('Analysis', analysisSchema);
+const Analysis = mongoose.model("Analysis", analysisSchema);
 
 module.exports = Analysis;
