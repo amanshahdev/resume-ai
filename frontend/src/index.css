@@ -1,79 +1,49 @@
-/* ============================================================
-   index.css — Global Design System
-   
-   WHAT: CSS custom properties (tokens), resets, typography,
-         and utility classes used across the entire application.
-   HOW:  CSS variables enable one-place theming. Google Fonts
-         loads two premium typefaces. All components reference
-         these tokens — no magic numbers anywhere.
-   WHY:  A centralised design system ensures visual consistency
-         and makes future rebranding a single-file change.
-   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
 
-@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700;800&display=swap");
-
-/* ── Design Tokens ─────────────────────────────────────────── */
 :root {
-  /* Brand */
-  --primary: #6c63ff;
-  --primary-dark: #5a52e0;
-  --primary-light: #8b85ff;
-  --primary-glow: rgba(108, 99, 255, 0.25);
-  --accent: #00d4aa;
-  --accent-dark: #00b894;
-  --danger: #ff6b6b;
-  --warning: #ffb830;
-  --success: #00d4aa;
-  --info: #4fc3f7;
+  --primary: #0f7b6c;
+  --primary-dark: #0b5d53;
+  --primary-light: #2aa18f;
+  --primary-glow: rgba(15, 123, 108, 0.2);
+  --accent: #ef8e52;
+  --accent-dark: #dd7b3f;
+  --danger: #cc4d4d;
+  --warning: #d38924;
+  --success: #158f64;
+  --info: #1f6e96;
 
-  /* Neutrals */
-  --bg: #0b0e1a;
-  --bg-card: #111627;
-  --bg-elevated: #161c30;
-  --bg-hover: #1c2440;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-light: rgba(255, 255, 255, 0.12);
+  --bg: #f6f1e8;
+  --bg-card: #fffcf6;
+  --bg-elevated: #f3ece1;
+  --bg-hover: #ece4d7;
+  --border: rgba(74, 58, 42, 0.16);
+  --border-light: rgba(74, 58, 42, 0.3);
 
-  /* Text */
-  --text-primary: #f0f2ff;
-  --text-secondary: #8892b0;
-  --text-muted: #5a6480;
-  --text-inverse: #0b0e1a;
+  --text-primary: #1f1b16;
+  --text-secondary: #51463b;
+  --text-muted: #807364;
+  --text-inverse: #fffef8;
 
-  /* Typography */
-  --font-display: "Syne", sans-serif;
-  --font-body: "DM Sans", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
 
-  /* Spacing */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-  --space-3xl: 64px;
-
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 30px;
   --radius-full: 999px;
 
-  /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 4px 12px rgba(43, 32, 20, 0.08);
+  --shadow-md: 0 14px 30px rgba(43, 32, 20, 0.12);
+  --shadow-lg: 0 26px 60px rgba(43, 32, 20, 0.16);
   --shadow-glow: 0 0 30px var(--primary-glow);
 
-  /* Transitions */
-  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 220ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-slow: 450ms cubic-bezier(0.25, 0.8, 0.25, 1);
 
-  /* Layout */
-  --sidebar-width: 260px;
-  --navbar-height: 64px;
-  --content-max: 1200px;
+  --sidebar-width: 280px;
+  --navbar-height: 74px;
+  --content-max: 1220px;
 }
 
 /* ── Reset ─────────────────────────────────────────────────── */
@@ -94,7 +64,18 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--bg);
+  background:
+    radial-gradient(
+      circle at 15% 8%,
+      rgba(239, 142, 82, 0.18) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 92%,
+      rgba(15, 123, 108, 0.18) 0%,
+      transparent 45%
+    ),
+    var(--bg);
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
@@ -132,12 +113,12 @@ p {
 }
 
 a {
-  color: var(--primary-light);
+  color: var(--primary);
   text-decoration: none;
   transition: color var(--transition);
 }
 a:hover {
-  color: var(--primary);
+  color: var(--primary-dark);
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────── */
@@ -146,14 +127,14 @@ a:hover {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-light);
+  background: rgba(81, 70, 59, 0.32);
   border-radius: var(--radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(81, 70, 59, 0.5);
 }
 
 /* ── Focus ─────────────────────────────────────────────────── */
@@ -252,6 +233,29 @@ a:hover {
   .auth-form-panel {
     padding-top: 18px;
   }
+}
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--primary-dark), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.page-enter {
+  animation: fadeIn 0.45s ease;
+}
+
+.skeleton {
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    90deg,
+    rgba(236, 228, 215, 0.6),
+    rgba(255, 252, 246, 0.95),
+    rgba(236, 228, 215, 0.6)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
 }
 
 @media (max-width: 640px) {

@@ -36,9 +36,9 @@ export default function UploadPage() {
     if (rejected.length > 0) {
       const reason = rejected[0].errors[0];
       if (reason.code === "file-too-large")
-        setError("File is too large. Maximum size is 5 MB.");
+        setError("File is too large. Maximum size is 25 MB.");
       else if (reason.code === "file-invalid-type")
-        setError("Only PDF files are accepted.");
+        setError("Only resume/CV PDF files are accepted.");
       else setError(reason.message);
       return;
     }
@@ -49,7 +49,7 @@ export default function UploadPage() {
     useDropzone({
       onDrop,
       accept: { "application/pdf": [".pdf"] },
-      maxSize: 5 * 1024 * 1024,
+      maxSize: 25 * 1024 * 1024,
       multiple: false,
       disabled: stage !== "idle",
     });
@@ -108,9 +108,9 @@ export default function UploadPage() {
     border: `2px dashed ${isDragReject ? "var(--danger)" : isDragActive ? "var(--primary)" : file ? "var(--accent)" : "var(--border-light)"}`,
     borderRadius: "var(--radius-xl)",
     background: isDragActive
-      ? "rgba(108,99,255,0.06)"
+      ? "rgba(15,123,108,0.09)"
       : file
-        ? "rgba(0,212,170,0.04)"
+        ? "rgba(239,142,82,0.08)"
         : "var(--bg-elevated)",
     padding: "52px 32px",
     textAlign: "center",
@@ -287,8 +287,8 @@ export default function UploadPage() {
                   width: 60,
                   height: 60,
                   borderRadius: "var(--radius-lg)",
-                  background: "rgba(0,212,170,0.15)",
-                  border: "1px solid rgba(0,212,170,0.3)",
+                  background: "rgba(239,142,82,0.15)",
+                  border: "1px solid rgba(239,142,82,0.35)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -383,7 +383,7 @@ export default function UploadPage() {
                   marginTop: 16,
                 }}
               >
-                Supports: PDF · Max size: 5 MB
+                Supports: Resume/CV PDF · Max size: 25 MB
               </p>
             </div>
           )}
@@ -446,7 +446,7 @@ export default function UploadPage() {
           {[
             "✅ Use a PDF with selectable text (not a scanned image)",
             "✅ Include clear section headers: Experience, Education, Skills",
-            "✅ File should be under 5 MB for fastest processing",
+            "✅ File should be under 25 MB for upload acceptance",
             "✅ Make sure contact info (email, LinkedIn) is visible",
           ].map((tip) => (
             <p

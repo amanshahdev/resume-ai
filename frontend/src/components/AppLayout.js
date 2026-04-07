@@ -1,19 +1,8 @@
-/**
- * components/AppLayout.js - Main Application Shell
- *
- * WHAT: Renders the persistent sidebar, top navbar, and the <Outlet> where
- *       page-level components mount.
- * HOW:  Uses React Router's <Outlet> so child routes render inside the layout
- *       without re-mounting the shell on navigation.
- * WHY:  Shared chrome (nav, sidebar) defined once here; pages stay clean.
- */
-
 import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
-// ── Icon components (inline SVG — no extra dependency) ───────────────────────
 const Icon = ({ d, size = 20 }) => (
   <svg
     width={size}
@@ -36,359 +25,323 @@ const Icons = {
   logout: "M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9",
   menu: "M3 12h18 M3 6h18 M3 18h18",
   close: "M18 6L6 18 M6 6l12 12",
-  user: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 11a4 4 0 100-8 4 4 0 000 8z",
-  brain:
-    "M9.5 2A2.5 2.5 0 017 4.5v0A2.5 2.5 0 014.5 7H4a2 2 0 00-2 2v2a2 2 0 002 2h.5A2.5 2.5 0 017 15.5v0A2.5 2.5 0 019.5 18h5a2.5 2.5 0 002.5-2.5v0A2.5 2.5 0 0119.5 13H20a2 2 0 002-2V9a2 2 0 00-2-2h-.5A2.5 2.5 0 0117 4.5v0A2.5 2.5 0 0114.5 2h-5z",
+  spark: "M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5L12 3z",
 };
 
-const NavItem = ({ to, icon, label, onClick }) => {
-  const baseStyle = {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "10px 16px",
-    borderRadius: "var(--radius-md)",
-    color: "var(--text-secondary)",
-    textDecoration: "none",
-    fontSize: "0.9rem",
-    fontWeight: 500,
-    fontFamily: "var(--font-body)",
-    transition: "all var(--transition)",
-    cursor: "pointer",
-    border: "none",
-    background: "none",
-    width: "100%",
-    textAlign: "left",
-  };
-
-  if (onClick) {
-    return (
-      <button
-        style={baseStyle}
-        onClick={onClick}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "var(--bg-hover)";
-          e.currentTarget.style.color = "var(--text-primary)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "none";
-          e.currentTarget.style.color = "var(--text-secondary)";
-        }}
-      >
-        <Icon d={Icons[icon]} />
-        {label}
-      </button>
-    );
-  }
-
-  return (
-    <NavLink
-      to={to}
-      style={({ isActive }) => ({
-        ...baseStyle,
-        background: isActive ? "var(--primary-glow)" : "none",
-        color: isActive ? "var(--primary-light)" : "var(--text-secondary)",
-        borderLeft: isActive
-          ? "3px solid var(--primary)"
-          : "3px solid transparent",
-      })}
-    >
-      <Icon d={Icons[icon]} />
-      {label}
-    </NavLink>
-  );
-};
+const NavItem = ({ to, icon, label }) => (
+  <NavLink
+    to={to}
+    style={({ isActive }) => ({
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "12px 14px",
+      borderRadius: "var(--radius-md)",
+      color: isActive ? "var(--text-inverse)" : "var(--text-secondary)",
+      textDecoration: "none",
+      fontSize: "0.88rem",
+      fontFamily: "var(--font-display)",
+      fontWeight: 700,
+      letterSpacing: "0.02em",
+      background: isActive
+        ? "linear-gradient(135deg, var(--primary), var(--primary-dark))"
+        : "transparent",
+      border: isActive ? "1px solid transparent" : "1px solid transparent",
+      boxShadow: isActive ? "0 12px 22px var(--primary-glow)" : "none",
+      transition: "all var(--transition)",
+    })}
+  >
+    <Icon d={Icons[icon]} size={17} />
+    {label}
+  </NavLink>
+);
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 860);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
-    const updateIsMobile = (event) => setIsMobile(event.matches);
+    const mediaQuery = window.matchMedia("(max-width: 859px)");
+    const updateIsMobile = (e) => setIsMobile(e.matches);
+
     updateIsMobile(mediaQuery);
-    if (mediaQuery.addEventListener) {
+    if (mediaQuery.addEventListener)
       mediaQuery.addEventListener("change", updateIsMobile);
-    } else {
-      mediaQuery.addListener(updateIsMobile);
-    }
+    else mediaQuery.addListener(updateIsMobile);
+
     return () => {
-      if (mediaQuery.removeEventListener) {
+      if (mediaQuery.removeEventListener)
         mediaQuery.removeEventListener("change", updateIsMobile);
-      } else {
-        mediaQuery.removeListener(updateIsMobile);
-      }
+      else mediaQuery.removeListener(updateIsMobile);
     };
   }, []);
 
   useEffect(() => {
-    if (!isMobile) setSidebarOpen(false);
+    if (!isMobile) setMobileOpen(false);
   }, [isMobile]);
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully");
+    toast.success("Logged out");
     navigate("/login");
   };
 
-  const avatarLetter = user?.name?.charAt(0).toUpperCase() || "U";
-
-  const sidebarStyle = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "var(--sidebar-width)",
-    height: "100vh",
-    background: "var(--bg-card)",
-    borderRight: "1px solid var(--border)",
-    display: "flex",
-    flexDirection: "column",
-    zIndex: 100,
-    transition: "transform var(--transition-slow)",
-    transform: isMobile
-      ? sidebarOpen
-        ? "translateX(0)"
-        : "translateX(-100%)"
-      : "translateX(0)",
-  };
+  const avatarLetter = user?.name?.charAt(0)?.toUpperCase() || "U";
 
   return (
-    <div
-      style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}
-    >
-      {/* ── Sidebar ──────────────────────────────────────────────────── */}
-      <aside style={sidebarStyle}>
-        {/* Logo */}
+    <div style={{ minHeight: "100vh", display: "flex", position: "relative" }}>
+      <aside
+        style={{
+          width: "var(--sidebar-width)",
+          minHeight: "100vh",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: 120,
+          padding: "18px",
+          transform: isMobile
+            ? mobileOpen
+              ? "translateX(0)"
+              : "translateX(-105%)"
+            : "translateX(0)",
+          transition: "transform var(--transition-slow)",
+        }}
+      >
         <div
           style={{
-            padding: "24px 20px 20px",
-            borderBottom: "1px solid var(--border)",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background:
-                "linear-gradient(135deg, var(--primary), var(--accent))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Icon d={Icons.brain} size={18} />
-          </div>
-          <div>
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 800,
-                fontSize: "1.1rem",
-                lineHeight: 1,
-              }}
-            >
-              ResumeAI
-            </div>
-            <div
-              style={{
-                fontSize: "0.7rem",
-                color: "var(--text-muted)",
-                marginTop: 2,
-              }}
-            >
-              AI-Powered Analyzer
-            </div>
-          </div>
-        </div>
-
-        {/* Nav links */}
-        <nav
-          style={{
-            flex: 1,
-            padding: "20px 12px",
+            height: "100%",
+            borderRadius: "26px",
+            background: "linear-gradient(180deg, #1e3f39, #16322d)",
+            boxShadow: "0 20px 50px rgba(16, 38, 35, 0.4)",
+            color: "#ecf4f2",
             display: "flex",
             flexDirection: "column",
-            gap: 4,
+            overflow: "hidden",
           }}
         >
           <div
             style={{
-              fontSize: "0.7rem",
-              color: "var(--text-muted)",
-              padding: "0 4px 8px",
-              fontWeight: 600,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
+              padding: "22px 18px 18px",
+              borderBottom: "1px solid rgba(236, 244, 242, 0.14)",
             }}
           >
-            Main
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 11,
+                  background: "linear-gradient(135deg, var(--accent), #f6c271)",
+                  color: "#11211d",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon d={Icons.spark} size={16} />
+              </div>
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 700,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  ResumeStudio
+                </div>
+                <div style={{ fontSize: "0.72rem", opacity: 0.8 }}>
+                  Sharper resumes, faster
+                </div>
+              </div>
+            </div>
           </div>
-          <NavItem to="/dashboard" icon="dashboard" label="Dashboard" />
-          <NavItem to="/upload" icon="upload" label="Upload Resume" />
-          <NavItem to="/history" icon="history" label="Analysis History" />
-        </nav>
 
-        {/* User panel */}
-        <div
-          style={{
-            padding: "16px",
-            borderTop: "1px solid var(--border)",
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
           <div
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background:
-                "linear-gradient(135deg, var(--primary), var(--accent))",
+              padding: "16px",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: "1rem",
-              flexShrink: 0,
+              flexDirection: "column",
+              gap: 8,
+              flex: 1,
             }}
           >
-            {avatarLetter}
+            <NavItem to="/dashboard" icon="dashboard" label="Dashboard" />
+            <NavItem to="/upload" icon="upload" label="Upload" />
+            <NavItem to="/history" icon="history" label="History" />
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+
+          <div
+            style={{
+              borderTop: "1px solid rgba(236, 244, 242, 0.14)",
+              padding: "16px",
+              display: "flex",
+              gap: 10,
+              alignItems: "center",
+            }}
+          >
             <div
               style={{
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "var(--text-primary)",
+                width: 38,
+                height: 38,
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontFamily: "var(--font-display)",
+                fontWeight: 700,
               }}
-              className="truncate"
             >
-              {user?.name}
+              {avatarLetter}
             </div>
-            <div
-              style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}
-              className="truncate"
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                className="truncate"
+                style={{
+                  fontSize: "0.86rem",
+                  color: "#f3f8f6",
+                  fontWeight: 600,
+                }}
+              >
+                {user?.name}
+              </div>
+              <div
+                className="truncate"
+                style={{
+                  fontSize: "0.72rem",
+                  color: "rgba(243, 248, 246, 0.72)",
+                }}
+              >
+                {user?.email}
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              style={{
+                border: "none",
+                width: 32,
+                height: 32,
+                borderRadius: 9,
+                background: "rgba(255, 255, 255, 0.1)",
+                color: "#f3f8f6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+              title="Logout"
             >
-              {user?.email}
-            </div>
+              <Icon d={Icons.logout} size={15} />
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            title="Logout"
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--text-muted)",
-              cursor: "pointer",
-              padding: 6,
-              borderRadius: "var(--radius-sm)",
-              transition: "color var(--transition)",
-              display: "flex",
-              alignItems: "center",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.color = "var(--danger)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.color = "var(--text-muted)")
-            }
-          >
-            <Icon d={Icons.logout} size={16} />
-          </button>
         </div>
       </aside>
 
-      {/* ── Mobile overlay ───────────────────────────────────────────── */}
-      <div
-        onClick={() => setSidebarOpen(false)}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,0.6)",
-          zIndex: 99,
-          display: sidebarOpen && isMobile ? "block" : "none",
-        }}
-      />
+      {isMobile && mobileOpen && (
+        <button
+          aria-label="Close sidebar"
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 110,
+            border: "none",
+            background: "rgba(15, 16, 16, 0.5)",
+          }}
+        />
+      )}
 
-      {/* ── Main content area ─────────────────────────────────────────── */}
       <div
         style={{
           flex: 1,
-          marginLeft: isMobile ? 0 : "var(--sidebar-width)",
+          marginLeft: isMobile ? 0 : "calc(var(--sidebar-width) + 14px)",
           minHeight: "100vh",
+          padding: isMobile ? "14px" : "16px 18px 18px 0",
           display: "flex",
           flexDirection: "column",
         }}
       >
-        {/* Top Navbar */}
         <header
           style={{
             height: "var(--navbar-height)",
+            borderRadius: "22px",
+            border: "1px solid var(--border)",
             background: "var(--bg-card)",
-            borderBottom: "1px solid var(--border)",
+            boxShadow: "var(--shadow-sm)",
             display: "flex",
             alignItems: "center",
-            padding: "0 28px",
-            gap: 16,
+            padding: "0 16px",
+            gap: 12,
             position: "sticky",
-            top: 0,
-            zIndex: 50,
+            top: 14,
+            zIndex: 90,
           }}
         >
           <button
-            onClick={() => setSidebarOpen((o) => !o)}
+            onClick={() => setMobileOpen((v) => !v)}
             style={{
-              background: "none",
-              border: "none",
+              display: isMobile ? "inline-flex" : "none",
+              border: "1px solid var(--border)",
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              alignItems: "center",
+              justifyContent: "center",
               color: "var(--text-secondary)",
-              cursor: "pointer",
-              display: isMobile ? "flex" : "none",
-              padding: 4,
+              background: "var(--bg-elevated)",
             }}
           >
-            <Icon d={Icons.menu} />
+            <Icon d={mobileOpen ? Icons.close : Icons.menu} size={17} />
           </button>
-          <div style={{ flex: 1 }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div>
             <div
               style={{
-                padding: "4px 10px",
+                fontFamily: "var(--font-display)",
+                fontWeight: 700,
+                fontSize: "1.06rem",
+                lineHeight: 1.2,
+              }}
+            >
+              Resume Command Center
+            </div>
+            <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+              Track uploads, run analysis, iterate faster
+            </div>
+          </div>
+          <div style={{ marginLeft: "auto" }}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                border: "1px solid var(--border-light)",
                 borderRadius: "var(--radius-full)",
-                background: "var(--primary-glow)",
-                border: "1px solid var(--primary)",
-                fontSize: "0.72rem",
-                color: "var(--primary-light)",
+                padding: "6px 12px",
+                fontSize: "0.74rem",
                 fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
+                color: "var(--text-secondary)",
+                background: "var(--bg-elevated)",
               }}
             >
               {user?.plan || "Free"} Plan
-            </div>
+            </span>
           </div>
         </header>
 
-        {/* Page content */}
         <main
           style={{
             flex: 1,
-            padding: isMobile ? "20px 16px" : "32px 28px",
-            maxWidth: "var(--content-max)",
-            width: "100%",
+            marginTop: 12,
+            borderRadius: "24px",
+            border: "1px solid var(--border)",
+            background: "var(--bg-card)",
+            boxShadow: "var(--shadow-sm)",
+            padding: isMobile ? "18px 14px" : "28px",
           }}
         >
-          <div className="page-enter">
-            <Outlet />
-          </div>
+          <Outlet />
         </main>
       </div>
     </div>

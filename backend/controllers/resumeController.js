@@ -10,12 +10,40 @@
  *       a resume later without re-uploading.
  */
 
-const fs = require('fs');
-const path = require('path');
-const pdfParse = require('pdf-parse');
-const Resume = require('../models/Resume');
-const Analysis = require('../models/Analysis');
-const User = require('../models/User');
+const fs = require("fs");
+const path = require("path");
+const pdfParse = require("pdf-parse");
+const Resume = require("../models/Resume");
+const Analysis = require("../models/Analysis");
+const User = require("../models/User");
+
+const RESUME_NAME_REGEX = /(resume|cv|curriculum\s+vitae|vitae)/i;
+const RESUME_SECTION_HINTS = [
+  /experience/i,
+  /work\s+history/i,
+  /education/i,
+  /skills/i,
+  /projects?/i,
+  /certifications?/i,
+  /summary/i,
+  /objective/i,
+];
+const EMAIL_REGEX = /[\w.-]+@[\w.-]+\.\w+/;
+
+const isLikelyResumeOrCv = (originalName, extractedText) => {
+  if (RESUME_NAME_REGEX.test(originalName || "")) return true;
+
+  const text = (extractedText || "").trim();
+  if (text.length < 120) return false;
+
+  const sectionHits = RESUME_SECTION_HINTS.reduce(
+    (count, pattern) => count + (pattern.test(text) ? 1 : 0),
+    0,
+  );
+
+  const hasEmail = EMAIL_REGEX.test(text);
+  return hasEmail && sectionHits >= 2;
+};
 
 // ────────────────────────────────────────────────────────────────────────────
 // @desc    Upload a new resume
@@ -25,26 +53,37 @@ const User = require('../models/User');
 const uploadResume = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Please upload a PDF file.' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file." });
     }
 
     const { originalname, filename, path: filePath, size, mimetype } = req.file;
 
     // ── Extract text from PDF ─────────────────────────────────────────────
-    let extractedText = '';
+    let extractedText = "";
     let pageCount = 1;
     let wordCount = 0;
 
     try {
       const dataBuffer = fs.readFileSync(filePath);
       const pdfData = await pdfParse(dataBuffer);
-      extractedText = pdfData.text || '';
+      extractedText = pdfData.text || "";
       pageCount = pdfData.numpages || 1;
       wordCount = extractedText.split(/\s+/).filter(Boolean).length;
     } catch (parseError) {
-      console.warn('PDF parsing warning:', parseError.message);
+      console.warn("PDF parsing warning:", parseError.message);
       // Don't fail the upload if parsing fails — still save the file
-      extractedText = '';
+      extractedText = "";
+    }
+
+    if (!isLikelyResumeOrCv(originalname, extractedText)) {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      return res.status(400).json({
+        success: false,
+        message:
+          "Only resume or CV documents are allowed. Please upload a resume/CV PDF.",
+      });
     }
 
     // ── Save Resume document ──────────────────────────────────────────────
@@ -58,15 +97,17 @@ const uploadResume = async (req, res, next) => {
       extractedText,
       wordCount,
       pageCount,
-      status: extractedText ? 'uploaded' : 'failed',
+      status: extractedText ? "uploaded" : "failed",
     });
 
     // ── Increment user's resume counter ───────────────────────────────────
-    await User.findByIdAndUpdate(req.user._id, { $inc: { totalResumesUploaded: 1 } });
+    await User.findByIdAndUpdate(req.user._id, {
+      $inc: { totalResumesUploaded: 1 },
+    });
 
     res.status(201).json({
       success: true,
-      message: 'Resume uploaded and parsed successfully.',
+      message: "Resume uploaded and parsed successfully.",
       resume: {
         id: resume._id,
         originalName: resume.originalName,
@@ -111,7 +152,7 @@ const getResumes = async (req, res, next) => {
     // Attach analysis status to each resume
     const resumeIds = resumes.map((r) => r._id);
     const analyses = await Analysis.find({ resume: { $in: resumeIds } })
-      .select('resume overallScore createdAt')
+      .select("resume overallScore createdAt")
       .lean();
 
     const analysisMap = {};
@@ -148,10 +189,15 @@ const getResumes = async (req, res, next) => {
 // ────────────────────────────────────────────────────────────────────────────
 const getResume = async (req, res, next) => {
   try {
-    const resume = await Resume.findOne({ _id: req.params.id, user: req.user._id });
+    const resume = await Resume.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
 
     if (!resume) {
-      return res.status(404).json({ success: false, message: 'Resume not found.' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Resume not found." });
     }
 
     const analysis = await Analysis.findOne({ resume: resume._id });
@@ -176,10 +222,15 @@ const getResume = async (req, res, next) => {
 // ────────────────────────────────────────────────────────────────────────────
 const deleteResume = async (req, res, next) => {
   try {
-    const resume = await Resume.findOne({ _id: req.params.id, user: req.user._id });
+    const resume = await Resume.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
 
     if (!resume) {
-      return res.status(404).json({ success: false, message: 'Resume not found.' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Resume not found." });
     }
 
     // Delete file from disk
@@ -193,7 +244,9 @@ const deleteResume = async (req, res, next) => {
     // Delete resume document
     await Resume.deleteOne({ _id: resume._id });
 
-    res.status(200).json({ success: true, message: 'Resume deleted successfully.' });
+    res
+      .status(200)
+      .json({ success: true, message: "Resume deleted successfully." });
   } catch (error) {
     next(error);
   }
