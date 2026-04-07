@@ -13,11 +13,11 @@
 const axios = require("axios");
 
 const HUGGINGFACE_MODEL =
-  process.env.HUGGINGFACE_MODEL || "mistralai/Mistral-7B-Instruct-v0.3";
+  process.env.HUGGINGFACE_MODEL || "google/flan-t5-large";
 const HUGGINGFACE_MODEL_FALLBACKS = [
   HUGGINGFACE_MODEL,
-  "google/flan-t5-large",
   "google/flan-t5-base",
+  "mistralai/Mistral-7B-Instruct-v0.3",
 ];
 const HUGGINGFACE_INFERENCE_BASE_URL =
   process.env.HUGGINGFACE_INFERENCE_URL ||
@@ -209,10 +209,6 @@ ${resumeText.substring(0, 6000)}`;
         ? `model ${model} returned HTTP ${status}`
         : `model ${model} failed: ${error.message}`;
       responseErrors.push(message);
-
-      if (status === 400 || status === 401 || status === 403) {
-        break;
-      }
     }
   }
 
