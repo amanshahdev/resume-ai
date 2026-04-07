@@ -21,7 +21,7 @@ const HUGGINGFACE_MODEL_FALLBACKS = [
 ];
 const HUGGINGFACE_INFERENCE_BASE_URL =
   process.env.HUGGINGFACE_INFERENCE_URL ||
-  "https://api-inference.huggingface.co/models";
+  "https://router.huggingface.co/hf-inference/models";
 const ALLOWED_EXPERIENCE_LEVELS = [
   "Entry Level",
   "Mid Level",
