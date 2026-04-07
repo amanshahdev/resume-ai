@@ -126,9 +126,7 @@ const normalizeAnalysisResponse = (rawData) => {
 
 const analyzeWithHuggingFace = async (resumeText) => {
   const apiKey = process.env.HUGGINGFACE_API_KEY;
-  if (!apiKey) {
-    throw new Error("HUGGINGFACE_API_KEY is required for resume analysis.");
-  }
+  const hasApiKey = Boolean(apiKey);
 
   const prompt = `You are an expert resume reviewer.
 Analyze the resume text and return ONLY valid JSON with this exact shape:
@@ -170,45 +168,70 @@ ${resumeText.substring(0, 6000)}`;
   const responseErrors = [];
 
   for (const model of HUGGINGFACE_MODEL_FALLBACKS) {
-    try {
-      const response = await axios.post(
-        `${HUGGINGFACE_INFERENCE_BASE_URL}/${model}`,
-        requestBody,
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          timeout: 30000,
+    const attemptConfigs = [];
+
+    if (hasApiKey) {
+      attemptConfigs.push({
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
         },
-      );
+        label: "authenticated",
+      });
+    }
 
-      const generatedText = Array.isArray(response.data)
-        ? response.data[0]?.generated_text
-        : response.data?.generated_text;
+    attemptConfigs.push({
+      headers: {
+        "Content-Type": "application/json",
+      },
+      label: "anonymous",
+    });
 
-      if (!generatedText || typeof generatedText !== "string") {
-        throw new Error("Hugging Face returned an unexpected response.");
+    for (const attempt of attemptConfigs) {
+      try {
+        const response = await axios.post(
+          `${HUGGINGFACE_INFERENCE_BASE_URL}/${model}`,
+          requestBody,
+          {
+            headers: attempt.headers,
+            timeout: 30000,
+          },
+        );
+
+        const generatedText = Array.isArray(response.data)
+          ? response.data[0]?.generated_text
+          : response.data?.generated_text;
+
+        if (!generatedText || typeof generatedText !== "string") {
+          throw new Error("Hugging Face returned an unexpected response.");
+        }
+
+        const jsonPayload = extractJsonPayload(generatedText);
+        if (!jsonPayload) {
+          throw new Error("Hugging Face response did not contain valid JSON.");
+        }
+
+        const parsed = JSON.parse(jsonPayload);
+        const analysis = normalizeAnalysisResponse(parsed);
+
+        return {
+          ...analysis,
+          aiModel: `huggingface/${model}${attempt.label === "anonymous" ? "+anon" : ""}`,
+        };
+      } catch (error) {
+        const status = error?.response?.status;
+        const message = status
+          ? `model ${model} (${attempt.label}) returned HTTP ${status}`
+          : `model ${model} (${attempt.label}) failed: ${error.message}`;
+        responseErrors.push(message);
+
+        if (
+          !(status === 401 || status === 403) ||
+          attempt.label === "anonymous"
+        ) {
+          continue;
+        }
       }
-
-      const jsonPayload = extractJsonPayload(generatedText);
-      if (!jsonPayload) {
-        throw new Error("Hugging Face response did not contain valid JSON.");
-      }
-
-      const parsed = JSON.parse(jsonPayload);
-      const analysis = normalizeAnalysisResponse(parsed);
-
-      return {
-        ...analysis,
-        aiModel: `huggingface/${model}`,
-      };
-    } catch (error) {
-      const status = error?.response?.status;
-      const message = status
-        ? `model ${model} returned HTTP ${status}`
-        : `model ${model} failed: ${error.message}`;
-      responseErrors.push(message);
     }
   }
 
