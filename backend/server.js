@@ -35,7 +35,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.FRONTEND_URL || 'http://localhost:3000',
-      'https://resume-ai-wheat-iota.vercel.app',
+      'https://resume-ai-app1.vercel.app',
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
