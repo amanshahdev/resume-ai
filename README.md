@@ -1,6 +1,6 @@
-# Resume Analyzer
+# ResumeAI
 
-Resume Analyzer is a full-stack web application for uploading resumes, extracting content from PDF files, and running an AI-based review to help users understand strengths, gaps, and improvement opportunities.
+ResumeAI is a full-stack web application for uploading resumes, extracting content from PDF files, and running an AI-based review to help users understand strengths, gaps, and improvement opportunities.
 
 The project is split into two parts:
 
