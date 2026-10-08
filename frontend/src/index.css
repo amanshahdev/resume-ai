@@ -1,0 +1,373 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  --primary: #0f7b6c;
+  --primary-dark: #0b5d53;
+  --primary-light: #2aa18f;
+  --primary-glow: rgba(15, 123, 108, 0.2);
+  --accent: #ef8e52;
+  --accent-dark: #dd7b3f;
+  --danger: #cc4d4d;
+  --warning: #d38924;
+  --success: #158f64;
+  --info: #1f6e96;
+
+  --bg: #f6f1e8;
+  --bg-card: #fffcf6;
+  --bg-elevated: #f3ece1;
+  --bg-hover: #ece4d7;
+  --border: rgba(74, 58, 42, 0.16);
+  --border-light: rgba(74, 58, 42, 0.3);
+
+  --text-primary: #1f1b16;
+  --text-secondary: #51463b;
+  --text-muted: #807364;
+  --text-inverse: #fffef8;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 30px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 4px 12px rgba(43, 32, 20, 0.08);
+  --shadow-md: 0 14px 30px rgba(43, 32, 20, 0.12);
+  --shadow-lg: 0 26px 60px rgba(43, 32, 20, 0.16);
+  --shadow-glow: 0 0 30px var(--primary-glow);
+
+  --transition: 220ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-slow: 450ms cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  --sidebar-width: 280px;
+  --navbar-height: 74px;
+  --content-max: 1220px;
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background:
+    radial-gradient(
+      circle at 15% 8%,
+      rgba(239, 142, 82, 0.18) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 92%,
+      rgba(15, 123, 108, 0.18) 0%,
+      transparent 45%
+    ),
+    var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Typography ────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+}
+h2 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+h3 {
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+}
+h4 {
+  font-size: 1.1rem;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+a:hover {
+  color: var(--primary-dark);
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(81, 70, 59, 0.32);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(81, 70, 59, 0.5);
+}
+
+/* ── Focus ─────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Utility Classes ───────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.auth-page {
+  width: 100%;
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-branding {
+  border-right: 1px solid var(--border);
+}
+
+.auth-form-panel {
+  width: 100%;
+  max-width: 520px;
+}
+
+.auth-card {
+  width: 100%;
+}
+
+.upload-page {
+  width: 100%;
+}
+
+.upload-step-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.upload-step-desc {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .auth-page {
+    flex-direction: column;
+  }
+
+  .auth-branding {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 22px;
+  }
+
+  .auth-form-panel {
+    padding-top: 18px;
+  }
+}
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--primary-dark), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.page-enter {
+  animation: fadeIn 0.45s ease;
+}
+
+.skeleton {
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    90deg,
+    rgba(236, 228, 215, 0.6),
+    rgba(255, 252, 246, 0.95),
+    rgba(236, 228, 215, 0.6)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@media (max-width: 640px) {
+  .upload-step-row {
+    flex-direction: column;
+  }
+
+  .upload-step-desc {
+    display: none;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--target-width, 0%);
+  }
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease forwards;
+}
+.animate-fadeInLeft {
+  animation: fadeInLeft 0.4s ease forwards;
+}
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+.animate-countUp {
+  animation: countUp 0.5s ease forwards;
+}
+
+/* ── Skeleton Loader ───────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 25%,
+    var(--bg-elevated) 50%,
+    var(--bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Glass Effect ──────────────────────────────────────────── */
+.glass {
+  background: rgba(17, 22, 39, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+/* ── Gradient Text ─────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-light), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Toast Overrides ───────────────────────────────────────── */
+.react-hot-toast > div {
+  font-family: var(--font-body) !important;
+  font-size: 0.875rem !important;
+}
+
+/* ── Page transition ───────────────────────────────────────── */
+.page-enter {
+  animation: fadeIn 0.35s ease forwards;
+}
